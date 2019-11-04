@@ -1,4 +1,3 @@
-#include <iostream>
 #include "engine.h"
 #include "con_backend.h"
 #include "logger.h"
@@ -6,7 +5,7 @@
 int main(int argc, char ** argv)
 {
     Logger logger("log.txt");
-	RenderingEngine engine(&logger);
+    RenderingEngine engine(&logger);
     ConsoleBackend console_backend;
     
     try 
@@ -19,6 +18,6 @@ int main(int argc, char ** argv)
     {
         logger.log(msg);
     }
-
-	return 0;
+    
+    return 0;
 }

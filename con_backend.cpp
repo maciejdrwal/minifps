@@ -16,16 +16,16 @@ ConsoleBackend::ConsoleBackend()
 ConsoleBackend::~ConsoleBackend()
 {
     //nocbreak();
-	//clrtoeol();
-	//refresh();
-	endwin();
+    //clrtoeol();
+    //refresh();
+    endwin();
     std::cout << "Destroying console backend" << std::endl;
 }
     
 char ConsoleBackend::handle_inputs() const
 {
-	char in_key = (char) getch();
-	if (in_key == 'q') return -1;
+    char in_key = (char) getch();
+    if (in_key == 'q') return -1;
 
     return in_key;
 }

@@ -4,7 +4,7 @@ DEBUG = 1
 CXX = clang++
 CXXFLAGS = -Wno-format -std=c++14
 LDFLAGS = -v -lncurses
-RM=rm -f
+RM = rm -f
 
 ifeq ($(DEBUG), 1)
 CXXFLAGS += -g -DDEBUG
@@ -27,7 +27,7 @@ depend: .depend
 	$(CXX) $(CXXFLAGS) -MM $^>>./.depend;
 
 clean:
-	$(RM) $(OBJS)
+	$(RM) $(OBJS) $(TARGET)
 
 distclean: clean
 	$(RM) *~ .depend
