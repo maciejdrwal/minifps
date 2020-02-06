@@ -11,24 +11,23 @@ const float TWOPI = 2*3.14159f;
 class IOBackend
 {
 public:
-    IOBackend() {}
+    IOBackend(Logger& logger) : m_logger(logger) {}
     virtual ~IOBackend() = default;
-    
-    void set_logger(Logger * l) { logger = l; }
+
     virtual char handle_inputs() const = 0;
     virtual void draw(const char * screen) const = 0;
 
 protected:
-    Logger * logger;
+    Logger& m_logger;
 };
 
 class RenderingEngine
 {
 public:
-    RenderingEngine(Logger * l = nullptr) : 
-        backend(nullptr), 
-        logger(l), 
-        screen(nullptr), 
+    RenderingEngine(const IOBackend& backend, Logger& logger) : 
+        m_backend(backend), 
+        m_logger(logger), 
+        m_screen(nullptr), 
         screen_width(120), 
         screen_height(40),
         player_x(14.5),
@@ -38,14 +37,12 @@ public:
         depth(16.0f),
         speed(1.0f),
         map_height(0),
-        map_width(0)
-        {}
+        map_width(0) {}
         
     ~RenderingEngine() = default;
     
     void run();
-    void load_map_from_file(const char * filename);
-    void register_backend(IOBackend * b);
+    void load_map_from_file(const std::string& filename);
     void update_status_bar();
     void update_minimap();
     void update_view();
@@ -53,10 +50,11 @@ public:
     
 private:
     std::string map_data;
-    IOBackend * backend;
-    Logger * logger;
+
+    const IOBackend& m_backend;
+    Logger& m_logger;
     
-    char * screen;
+    char * m_screen;
     
     double player_x;
     double player_y;

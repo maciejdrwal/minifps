@@ -10,59 +10,37 @@
 #include "engine.h"
 #include "logger.h"
 
-template<typename T> std::string tostr(T i)
-{
-    std::stringstream ss;
-    ss << i;
-    return ss.str();
-}
-
-void RenderingEngine::register_backend(IOBackend * b)
-{
-    this->backend = b;
-    b->set_logger(this->logger);
-}
-
 void RenderingEngine::run()
 {
-    this->logger->log("Engine started.");
+    m_logger.log("Engine started.");
     
-    this->screen = new char[screen_width * screen_height];
-    std::fill_n(this->screen, screen_width * screen_height, ' ');
+    m_screen = new char[screen_width * screen_height];
+    std::fill_n(m_screen, screen_width * screen_height, ' ');
         
-    if (!this->backend)
-    {
-        //std::cout << "Error: IO backend not initialized." << std::endl;
-        throw "Error: IO backend not initialized.";
-        return;
-    }
-    
     auto tp1 = std::chrono::system_clock::now();
     auto tp2 = std::chrono::system_clock::now();
         
-    while (1)
-    {
+    while (1) {
         // We'll need time differential per frame to calculate modification
         // to movement speeds, to ensure consistant movement, as ray-tracing
         // is non-deterministic
         tp2 = std::chrono::system_clock::now();
-        std::chrono::duration<float> elapsedTime = tp2 - tp1;
+        std::chrono::duration<float> elapsed = tp2 - tp1;
         tp1 = tp2;
-        float elapsed_time = elapsedTime.count();
+        const auto elapsed_time = elapsed.count();
         
-        int key_code = this->backend->handle_inputs();
-        if (key_code == -1)
-        {
-            this->logger->log("Quitting.");
+        const int key_code = m_backend.handle_inputs();
+        if (key_code == -1) {
+            m_logger.log("Quitting.");
             break;
         }
 
-        this->update_movement(key_code);
-        this->update_view();
-        this->update_status_bar();
-        this->update_minimap();
+        update_movement(key_code);
+        update_view();
+        update_status_bar();
+        update_minimap();
         
-        this->backend->draw(this->screen);
+        m_backend.draw(m_screen);
     }
 }
 
@@ -70,8 +48,7 @@ void RenderingEngine::update_view()
 {
     // Execute ray-casting algorithm.
     
-    for (int x = 0; x < screen_width; x++)
-    {
+    for (int x = 0; x < screen_width; x++) {
         // For each column, calculate the projected ray angle into world space
         float ray_angle = (player_a - FOV/2.0f) + ((float) x / (float) screen_width) * FOV;
 
@@ -156,9 +133,9 @@ void RenderingEngine::update_view()
         {
             // Each Row
             if(y <= n_ceiling)
-                screen[y * screen_width + x] = ' ';
+                m_screen[y * screen_width + x] = ' ';
             else if(y > n_ceiling && y <= n_floor)
-                screen[y * screen_width + x] = shade;
+                m_screen[y * screen_width + x] = shade;
             else // Floor
             {
                 // Shade floor based on distance
@@ -168,7 +145,8 @@ void RenderingEngine::update_view()
                 else if (b < 0.75)  shade = '.';
                 else if (b < 0.9)   shade = '-';
                 else                shade = ' ';
-                screen[y * screen_width + x] = shade;
+                
+                m_screen[y * screen_width + x] = shade;
             }
     	}
     }
@@ -194,10 +172,10 @@ void RenderingEngine::update_minimap()
     {
         for (int ny = 0; ny < map_height; ny++)
         {
-            screen[(ny+1) * screen_width + nx] = map_data[ny * map_width + nx];
+            m_screen[(ny+1) * screen_width + nx] = map_data[ny * map_width + nx];
         }
     }
-    screen[((int) player_x + 1) * screen_width + (int) player_y] = player_symbol(player_a);
+    m_screen[(static_cast<int>(player_x)+ 1) * screen_width + static_cast<int>(player_y)] = player_symbol(player_a);
 }
 
 void RenderingEngine::update_status_bar()
@@ -207,7 +185,7 @@ void RenderingEngine::update_status_bar()
 
     // copy string without null-terminating character
     int len = std::strlen(info_bar);
-    std::copy_n(info_bar, len-1, this->screen);
+    std::copy_n(info_bar, len-1, m_screen);
 }
 
 void RenderingEngine::update_movement(char in_key)
@@ -254,14 +232,14 @@ void RenderingEngine::update_movement(char in_key)
     }
 }
 
-void RenderingEngine::load_map_from_file(const char * filename)
+void RenderingEngine::load_map_from_file(const std::string& filename)
 {
     std::ifstream fin;
     std::string line;
     fin.open(filename);
     while (fin >> line) { 
-        this->map_data += line;
-        map_width = std::max((size_t) map_width, line.length());
+        map_data += line;
+        map_width = std::max(static_cast<size_t>(map_width), line.length());
         map_height++;
     }
     fin.close();

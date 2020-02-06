@@ -3,7 +3,7 @@
 
 #include "con_backend.h"
 
-ConsoleBackend::ConsoleBackend()
+ConsoleBackend::ConsoleBackend(Logger& logger) : IOBackend(logger)
 {
     std::cout << "Initializing console backend" << std::endl;
     initscr();
@@ -24,9 +24,8 @@ ConsoleBackend::~ConsoleBackend()
     
 char ConsoleBackend::handle_inputs() const
 {
-    char in_key = (char) getch();
+    const auto in_key = static_cast<char>(getch());
     if (in_key == 'q') return -1;
-
     return in_key;
 }
 

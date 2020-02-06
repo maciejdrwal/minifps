@@ -5,16 +5,15 @@
 int main(int argc, char ** argv)
 {
     Logger logger("log.txt");
-    RenderingEngine engine(&logger);
-    ConsoleBackend console_backend;
+    ConsoleBackend console_backend(logger);
+    RenderingEngine engine(console_backend, logger);
     
     try 
     {
-        engine.register_backend(&console_backend);
         engine.load_map_from_file("map1.txt");
         engine.run();
     }
-    catch (char const * msg)
+    catch (const std::string& msg)
     {
         logger.log(msg);
     }

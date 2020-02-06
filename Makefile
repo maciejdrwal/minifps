@@ -1,37 +1,35 @@
-TARGET = fps
-DEBUG = 1
+SHELL = sh
+TARGET = minifps
+DEBUG = 0
 
-CXX = clang++
-CXXFLAGS = -Wno-format -std=c++14
-LDFLAGS = -v -lncurses
+INCLUDES =
+LIBS =
+
+CXX = g++
+CXXFLAGS = -std=c++17
+LDFLAGS = -v -MD -lncurses
 RM = rm -f
 
 ifeq ($(DEBUG), 1)
 CXXFLAGS += -g -DDEBUG
 else
-CXXFLAGS += -O2
+CXXFLAGS += -O3
 endif
 
 SRCS = $(wildcard *.cpp)
-OBJS = $(subst .cpp,.o,$(SRCS))
+OBJS = $(SRCS:.cpp=.o)
+DEPS = $(OBJS:.o=.d)
 
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJS)
+	$(CXX) -o $@ $^ $(LIBS) $(LDFLAGS)
 
-depend: .depend
+-include $(DEPS)
 
-.depend: $(SRCS)
-	$(RM) ./.depend
-	$(CXX) $(CXXFLAGS) -MM $^>>./.depend;
+%.d: %.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $< -MM -MP -MT $(@:.d=.o) >$@
 
 clean:
-	$(RM) $(OBJS) $(TARGET)
-
-distclean: clean
-	$(RM) *~ .depend
-
-print-% : ; @echo $* = $($*)
-
-include .depend
+	$(RM) $(SRCS:.cpp=.o) $(SRCS:.cpp=.d)
+	$(RM) $(TARGET)

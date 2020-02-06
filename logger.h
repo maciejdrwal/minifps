@@ -7,18 +7,18 @@
 class Logger
 {
 public:
-    Logger(const char * filename) : _i(0) { this->fout.open(filename); }
-    ~Logger() { this->fout.close(); }
+    Logger(const std::string& filename) : m_i(0) { m_fout.open(filename); }
+    ~Logger() { m_fout.close(); }
     
-    void log(const std::string & msg) 
+    void log(const std::string& msg)
     {
-        auto t = std::time(nullptr);
-        this->fout << _i++ << ": " << std::put_time(std::localtime(&t), "%F %T%z") << "    " << msg << std::endl; 
+        const auto t = std::time(nullptr);
+        m_fout << m_i++ << ": " << std::put_time(std::localtime(&t), "%F %T%z") << "    " << msg << std::endl; 
     };
 
 private:
-    std::ofstream fout;
-    unsigned long _i;
+    std::ofstream m_fout;
+    unsigned long m_i;
 };
 
 #endif

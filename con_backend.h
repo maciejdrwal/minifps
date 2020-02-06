@@ -8,7 +8,7 @@ class Logger;
 class ConsoleBackend : public IOBackend
 {
 public:
-    ConsoleBackend();
+    ConsoleBackend(Logger& logger);
     virtual ~ConsoleBackend();
 
     virtual char handle_inputs() const;
